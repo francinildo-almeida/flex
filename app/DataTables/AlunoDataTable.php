@@ -2,15 +2,15 @@
 
 namespace App\DataTables;
 
-use App\Models\Professor;
+use App\Models\Aluno;
+use Collective\Html\FormFacade;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
-use Collective\Html\FormFacade;
 use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Html\Editor\Editor;
 
-class ProfessorDataTable extends DataTable
+class AlunoDataTable extends DataTable
 {
     /**
      * Build DataTable class.
@@ -22,33 +22,35 @@ class ProfessorDataTable extends DataTable
     {
         return datatables()
             ->eloquent($query)
-            ->addColumn('action', function($professor) {
+            ->addColumn('action', function($aluno){
                 $acoes = link_to(
-                    route('professor.edit', $professor),
+                    route('aluno.edit' , $aluno),
                     'Editar',
                     ['class' => 'btn btn-sm btn-primary']
                 );
                 $acoes .= FormFacade::button(
-                    'Excluir',
-                    [
-                        'class' => 'btn btn-sm btn-danger',
-                        'onclick' => "excluir('" .route('professor.destroy', $professor) ."')"
-                    ]
+                    "Excluir",
+                    ['class' =>
+                        'btn btn-sm btn-danger ml-1',
+                        'onclick' =>"excluir('" . route('aluno.destroy', $aluno) ."')"
+                        ]
                 );
                 return $acoes;
+
             })
-            ->editColumn('date', function ($professor){
-                return date('d/m/Y', strtotime($professor->date));
-            });
+            ->editColumn('imagem', function ($aluno) {
+                return '<img style="height: 50px;" src="' . asset('imagens/' . $aluno->imagem) . '" />';
+            })
+            ->rawColumns(['action', 'imagem']);
     }
 
     /**
      * Get query source of dataTable.
      *
-     * @param \App\ProfessorDataTable $model
+     * @param \App\Aluno $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Professor $model)
+    public function query(Aluno $model)
     {
         return $model->newQuery();
     }
@@ -61,17 +63,14 @@ class ProfessorDataTable extends DataTable
     public function html()
     {
         return $this->builder()
-                    ->setTableId('professor-table')
+                    ->setTableId('aluno-table')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
                     ->dom('Bfrtip')
                     ->orderBy(1)
                     ->buttons(
-                        Button::make('create')->text('Adicionar Professor')
-                    )
-                    ->parameters([
-                        'language' => ['url' => '//cdn.datatables.net/plug-ins/1.10.20/i18n/Portuguese-Brasil.json']
-                    ]);
+                        Button::make('create')->text('Novo Aluno')
+                    );
     }
 
     /**
@@ -84,8 +83,11 @@ class ProfessorDataTable extends DataTable
         return [
             Column::make('id'),
             Column::make('nome'),
-            Column::make('formacao'),
-            Column::make('date')->title('Data Nascimento'),
+            Column::make('cpf'),
+            Column::make('data_nascimento'),
+            Column::make('imagem'),
+            Column::make('curso_id'),
+            Column::make('created_at'),
             Column::computed('action')
                   ->exportable(false)
                   ->title('Ações')
@@ -100,6 +102,6 @@ class ProfessorDataTable extends DataTable
      */
     protected function filename()
     {
-        return 'Professor_' . date('YmdHis');
+        return 'Aluno_' . date('YmdHis');
     }
 }
