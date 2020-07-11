@@ -2,6 +2,7 @@
 
 namespace App\DataTables;
 
+use App\Models\Curso;
 use App\Models\Professor;
 use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
@@ -10,7 +11,7 @@ use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Html\Editor\Editor;
 
-class ProfessorDataTable extends DataTable
+class CursoDataTable extends DataTable
 {
     /**
      * Build DataTable class.
@@ -22,9 +23,9 @@ class ProfessorDataTable extends DataTable
     {
         return datatables()
             ->eloquent($query)
-            ->addColumn('action', function($professor) {
+            ->addColumn('action', function($curso) {
                 $acoes = link_to(
-                    route('professor.edit', $professor),
+                    route('curso.edit', $curso),
                     'Editar',
                     ['class' => 'btn btn-sm btn-primary']
                 );
@@ -32,23 +33,23 @@ class ProfessorDataTable extends DataTable
                     'Excluir',
                     [
                         'class' => 'btn btn-sm btn-danger',
-                        'onclick' => "excluir('" .route('professor.destroy', $professor) ."')"
+                        'onclick' => "excluir('" .route('curso.destroy', $curso) ."')"
                     ]
                 );
                 return $acoes;
             })
-            ->editColumn('date', function ($professor){
-                return date('d/m/Y', strtotime($professor->date));
+            ->editColumn('professor_id', function($curso) {
+                return Professor::find($curso->professor_id)->nome;
             });
     }
 
     /**
      * Get query source of dataTable.
      *
-     * @param \App\ProfessorDataTable $model
+     * @param \App\Curso $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Professor $model)
+    public function query(Curso $model)
     {
         return $model->newQuery();
     }
@@ -61,15 +62,13 @@ class ProfessorDataTable extends DataTable
     public function html()
     {
         return $this->builder()
-                    ->setTableId('professor-table')
+                    ->setTableId('curso-table')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
                     ->dom('Bfrtip')
                     ->orderBy(1)
                     ->buttons(
-                        Button::make('create')->text('Adicionar Professor'),
-                        Button::make('export')->text('Exportar'),
-                        Button::make('print')->text('Imprimir')
+                        Button::make('create')->text('Adicionar Curso')
                     )
                     ->parameters([
                         'language' => ['url' => '//cdn.datatables.net/plug-ins/1.10.20/i18n/Portuguese-Brasil.json']
@@ -86,8 +85,8 @@ class ProfessorDataTable extends DataTable
         return [
             Column::make('id'),
             Column::make('nome'),
-            Column::make('formacao'),
-            Column::make('date')->title('Data Nascimento'),
+            Column::make('professor_id')
+            ->title('Professor'),
             Column::computed('action')
                   ->exportable(false)
                   ->title('Ações')
@@ -102,6 +101,6 @@ class ProfessorDataTable extends DataTable
      */
     protected function filename()
     {
-        return 'Professor_' . date('YmdHis');
+        return 'Curso_' . date('YmdHis');
     }
 }
